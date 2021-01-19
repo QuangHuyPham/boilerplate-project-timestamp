@@ -28,7 +28,7 @@ app.get("/api/hello", function (req, res) {
 app.get("/api/timestamp/:date?", async function (req, res) {
   if (!req.params.date) {
       // console.log( dayjs().valueOf(), `${dayjs().toString()}`)
-      return res.json({unix: dayjs().valueOf(), utc: dayjs().format()});
+      return res.json({unix: dayjs().valueOf(), utc: dayjs().toString()});
   }
 
   if(dayjs(req.params.date).isValid()) {
