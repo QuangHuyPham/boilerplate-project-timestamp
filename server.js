@@ -32,11 +32,8 @@ app.get("/", function(req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
-  const {file} = req;
-
-  return res.json({"name": file.filename, "type": file.mimetype, "size": file.size});
-  // res.json({"name":"7e60d0b59f9084aecbd0b6dce216a475","type":"image/png","size":2859});
+app.post('/api/fileanalyse', multer().single('upfile'), function (req, res) {
+  return res.json({"name": file.originalname, "type": file.mimetype, "size": file.size});
 }) ;
 
 // your first API endpoint... 
@@ -104,14 +101,27 @@ app.post('/api/exercise/new-user', function(req, res) {
 
 app.post('/api/exercise/add', async function(req, res) {
   const { userId, description, duration, date } = req.body;
-  const newuserinfo = { userId, description, duration: +duration, date: date || "2021-01-20" };
+  const newuserinfo = { userId, description, duration: parseInt(duration), date: date || new Date().toISOString().slice(0, 10) };
   let user;
   await users.map(u => {
     if (u._id == userId) user = u;
   })
   userinfo.push(newuserinfo);
-  const result = { username: user.username, description, duration: parseInt(duration), id: user._id, date: date || dayjs().format('ddd MMM DD YYYY') };
+  // const result = {_id: user._id, username: user.username, date: newuserinfo.date, description: newuserinfo.description, duration: newuserinfo.duration};
+
+  let responseObject = {}
+  responseObject['_id'] = user._id;
+  responseObject['username'] = user.username;
+  responseObject['description'] = newuserinfo.description;
+  responseObject['duration'] = newuserinfo.duration;
+  responseObject['date'] = new Date(newuserinfo.date).toDateString();
+
+  console.log('responseObject', responseObject)
+  res.json(responseObject)
   
+  // console.log(newuserinfo.date);
+  // console.log(new Date().toDateString());
+
   // res.json({
   //   username: user.username,
   //   _id: user._id,
@@ -120,7 +130,7 @@ app.post('/api/exercise/add', async function(req, res) {
   //   date: "2021-01-21"
   // });
 
-  res.json(result);
+  // res.json(result);
 });
 
 app.get('/api/exercise/log', async function(req, res) {
